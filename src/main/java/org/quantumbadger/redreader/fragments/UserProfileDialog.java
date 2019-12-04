@@ -19,6 +19,7 @@ package org.quantumbadger.redreader.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -44,6 +45,8 @@ import org.quantumbadger.redreader.reddit.things.RedditUser;
 import org.quantumbadger.redreader.reddit.url.UserPostListingURL;
 import org.quantumbadger.redreader.views.liststatus.ErrorView;
 import org.quantumbadger.redreader.views.liststatus.LoadingView;
+
+import static android.graphics.Color.*;
 
 public class UserProfileDialog extends PropertiesDialog {
 
@@ -141,6 +144,7 @@ public class UserProfileDialog extends PropertiesDialog {
 						items.addView(commentsButton);
 						// TODO use margin? or framelayout? scale padding dp
 						// TODO change button color
+						commentsButton.setBackgroundColor(Color.GREEN);
 						commentsButton.setPadding(20, 20, 20, 20);
 
 						final Button postsButton = new Button(context);
