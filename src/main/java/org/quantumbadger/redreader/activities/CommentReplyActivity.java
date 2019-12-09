@@ -99,17 +99,21 @@ public class CommentReplyActivity extends BaseActivity {
 
 		final LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.comment_reply, null);
 
+		// find the objects view with XML id
 		usernameSpinner = (Spinner)layout.findViewById(R.id.comment_reply_username);
 		inboxReplies = (CheckBox)layout.findViewById(R.id.comment_reply_inbox);
 		textEdit = (EditText)layout.findViewById(R.id.comment_reply_text);
 
+		// on active l'inbox que si c'est un truc à cocher
 		if (mParentType == ParentType.COMMENT_OR_POST){
 			inboxReplies.setVisibility(View.VISIBLE);
 		}
 
+		// permet de récupérer la source (INTENT)
 		if(intent != null && intent.hasExtra(PARENT_ID_AND_TYPE_KEY)) {
 			parentIdAndType = intent.getStringExtra(PARENT_ID_AND_TYPE_KEY);
 
+		// permet de récupérer à partir d'un save instance
 		} else if(savedInstanceState != null && savedInstanceState.containsKey(PARENT_ID_AND_TYPE_KEY)) {
 			parentIdAndType = savedInstanceState.getString(PARENT_ID_AND_TYPE_KEY);
 
@@ -119,11 +123,17 @@ public class CommentReplyActivity extends BaseActivity {
 
 		final String existingCommentText;
 
+		// récupération du brouillon si déjà existant
+		// impression que ça ne s'active qu'en cas de gros plantage
 		if(savedInstanceState != null && savedInstanceState.containsKey(COMMENT_TEXT_KEY)) {
 			existingCommentText = savedInstanceState.getString(COMMENT_TEXT_KEY);
+			System.out.println("DEBUG : existingCommentText = savedInstanceState.getString(COMMENT_TEXT_KEY)" + existingCommentText);
 
+		// c'est là que l'on fait la vérification qu'on est bien sur le même commentaire que précédemment
+		// en fait ça serait mieux si on pouvait le sauvegarder pour plusieurs...
 		} else if(lastText != null && parentIdAndType.equals(lastParentIdAndType)) {
 			existingCommentText = lastText;
+			System.out.println("DEBUG : existingCommentText = lastText;" + existingCommentText);
 
 		} else {
 			existingCommentText = null;
@@ -159,11 +169,17 @@ public class CommentReplyActivity extends BaseActivity {
 		setBaseActivityContentView(sv);
 	}
 
+	// permet de sauvegarder l'état avant de changer de page
+	// the state will be passed to onCreate
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
+		System.out.println("DEBUG : saving instance state..." );
+		System.out.println("    " + textEdit.getText().toString());
+		System.out.println("    " + parentIdAndType);
 		super.onSaveInstanceState(outState);
 		outState.putString(COMMENT_TEXT_KEY, textEdit.getText().toString());
 		outState.putString(PARENT_ID_AND_TYPE_KEY, parentIdAndType);
+
 	}
 
 	@Override

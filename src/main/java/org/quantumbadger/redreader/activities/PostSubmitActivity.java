@@ -74,8 +74,10 @@ public class PostSubmitActivity extends BaseActivity {
 
 		setTitle(R.string.submit_post_actionbar);
 
+		// on utilise le fichier xml pour faire le design général
 		final LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.post_submit, null);
 
+		// on récupère chaque objet du XML
 		typeSpinner = (Spinner)layout.findViewById(R.id.post_submit_type);
 		usernameSpinner = (Spinner)layout.findViewById(R.id.post_submit_username);
 		subredditEdit = (EditText)layout.findViewById(R.id.post_submit_subreddit);
@@ -85,22 +87,29 @@ public class PostSubmitActivity extends BaseActivity {
 		markAsNsfwCheckbox = (CheckBox) layout.findViewById(R.id.post_submit_mark_nsfw);
 		markAsSpoilerCheckbox = (CheckBox) layout.findViewById(R.id.post_submit_mark_spoiler);
 
+		// permet de récupérer l'intent qui a lancé l'activité
 		final Intent intent = getIntent();
 		if(intent != null) {
 
+			// on vérifie qu'il existe un extra pour la clef subreddit
 			if(intent.hasExtra("subreddit")) {
 
+				// si oui on récupère la valeur
 				final String subreddit = intent.getStringExtra("subreddit");
 
+				// on remplit automatiquement le texte de subreddit dans ce cas.
 				if(subreddit != null && subreddit.length() > 0 && !subreddit.matches("/?(r/)?all/?") && subreddit.matches("/?(r/)?\\w+/?")) {
 					subredditEdit.setText(subreddit);
 				}
-
+			// ACTION_SEND sont des actions standards d'un Intent
+			// getAction permet de récupérer l'action standard
+			// permet d'insérer l'URL dans le corps du message. Bizarre.
 			} else if(Intent.ACTION_SEND.equalsIgnoreCase(intent.getAction()) && intent.hasExtra(Intent.EXTRA_TEXT)){
 				final String url = intent.getStringExtra(Intent.EXTRA_TEXT);
 				textEdit.setText(url);
 			}
 
+		// dans le cas où on tourne le téléphone I suppose.
 		} else if(savedInstanceState != null && savedInstanceState.containsKey("post_title")) {
 			titleEdit.setText(savedInstanceState.getString("post_title"));
 			textEdit.setText(savedInstanceState.getString("post_body"));
@@ -116,12 +125,13 @@ public class PostSubmitActivity extends BaseActivity {
 				usernames.add(account.username);
 			}
 		}
-
+		// devrait être beaucoup plus haut
 		if(usernames.size() == 0) {
 			General.quickToast(this, R.string.error_toast_notloggedin);
 			finish();
 		}
 
+		// on remplit les Spinner grâce à des adapters
 		usernameSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, usernames));
 		typeSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, postTypes));
 
@@ -145,11 +155,13 @@ public class PostSubmitActivity extends BaseActivity {
 	private void setHint() {
 
 		final Object selected = typeSpinner.getSelectedItem();
-
+		// permet d'upload vers Imgur, un autre réseau social bizarre OU un URL
 		if(selected.equals("Link") || selected.equals("Upload to Imgur")) {
+			// SHOULD BE BODY AND NOT URL
 			textEdit.setHint(getString(R.string.submit_post_url_hint));
 			textEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
 			textEdit.setSingleLine(true);
+		// à voir ce qu'on en comprend dans les actions
 		} else if(selected.equals("Self")) {
 			textEdit.setHint(getString(R.string.submit_post_self_text_hint));
 			textEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
@@ -161,12 +173,14 @@ public class PostSubmitActivity extends BaseActivity {
 		if(selected.equals("Upload to Imgur")) {
 
 			typeSpinner.setSelection(0); // Link
-
+			// on envoie un code 1 à l'activité ImgurUpload.
+			// on a le retour plus tard dans le code (onActivityResult)
 			final Intent intent = new Intent(this, ImgurUploadActivity.class);
 			startActivityForResult(intent, REQUEST_UPLOAD);
 		}
 	}
 
+	// on sauvegarde les infos au cas où
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -176,6 +190,8 @@ public class PostSubmitActivity extends BaseActivity {
 		outState.putInt("post_type", typeSpinner.getSelectedItemPosition());
 	}
 
+	// un menu en plus. Pour faire un preview avant le post
+	// voir sur quoi ça nous amène.
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -196,7 +212,7 @@ public class PostSubmitActivity extends BaseActivity {
 			String subreddit = subredditEdit.getText().toString();
 			final String postTitle = titleEdit.getText().toString();
 			final String text = textEdit.getText().toString();
-
+			// vérifie qu'on a bien tous les champs remplis avant l'envoi
 			if (subreddit.isEmpty()) {
 				Toast.makeText(this, R.string.submit_post_specify_subreddit, Toast.LENGTH_SHORT).show();
 				subredditEdit.requestFocus();
@@ -299,6 +315,7 @@ public class PostSubmitActivity extends BaseActivity {
 				final boolean markAsNsfw = markAsNsfwCheckbox.isChecked();
 				final boolean markAsSpoiler = markAsSpoilerCheckbox.isChecked();
 
+				// permet d'envoyer le message via l'API Reddit !
 				RedditAPI.submit(cm, handler, selectedAccount, is_self, subreddit, postTitle, text,
 						sendRepliesToInbox, markAsNsfw, markAsSpoiler, this);
 
