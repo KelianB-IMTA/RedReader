@@ -21,8 +21,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -531,13 +534,18 @@ public final class OptionsMenuUtility {
 	}
 
 	private static void addSort(final AppCompatActivity activity, final Menu menu, final int name, final PostSort order) {
-
-		menu.add(activity.getString(name)).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+		MenuItem item = menu.add(activity.getString(name));
+		item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			public boolean onMenuItemClick(final MenuItem item) {
 				((OptionsMenuPostsListener)activity).onSortSelected(order);
 				return true;
 			}
 		});
+
+		if(activity instanceof OptionsMenuPostsListener) {
+			if(((OptionsMenuPostsListener) activity).getPostSort().equals(order))
+				highlightMenuItem(item);
+		}
 	}
 
 	private static void addAllCommentSorts(final AppCompatActivity activity, final Menu menu, final boolean icon) {
@@ -556,16 +564,24 @@ public final class OptionsMenuUtility {
 		addSort(activity, sortComments, R.string.sort_comments_controversial, PostCommentListingURL.Sort.CONTROVERSIAL);
 		addSort(activity, sortComments, R.string.sort_comments_top, PostCommentListingURL.Sort.TOP);
 		addSort(activity, sortComments, R.string.sort_comments_qa, PostCommentListingURL.Sort.QA);
+
+
 	}
 
 	private static void addSort(final AppCompatActivity activity, final Menu menu, final int name, final PostCommentListingURL.Sort order) {
-
-		menu.add(activity.getString(name)).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+		MenuItem item = menu.add(activity.getString(name));
+		item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			public boolean onMenuItemClick(final MenuItem item) {
 				((OptionsMenuCommentsListener)activity).onSortSelected(order);
 				return true;
 			}
 		});
+
+		// Highlight this item if it is selected
+		if(activity instanceof OptionsMenuCommentsListener) {
+			if(((OptionsMenuCommentsListener) activity).getCommentSort().equals(order))
+				highlightMenuItem(item);
+		}
 	}
 
 	private static void addAllUserCommentSorts(final AppCompatActivity activity, final Menu menu, final boolean icon) {
@@ -592,7 +608,7 @@ public final class OptionsMenuUtility {
 	}
 
 	private static void addSort(final AppCompatActivity activity, final Menu menu, final int name, final UserCommentListingURL.Sort order) {
-
+		MenuItem item = menu.add(activity.getString(name));
 		menu.add(activity.getString(name)).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			@Override
 			public boolean onMenuItemClick(MenuItem menuItem) {
@@ -600,6 +616,17 @@ public final class OptionsMenuUtility {
 				return true;
 			}
 		});
+
+		if(activity instanceof OptionsMenuCommentsListener) {
+			if(((OptionsMenuCommentsListener) activity).getCommentSort().equals(order))
+				highlightMenuItem(item);
+		}
+	}
+
+	private static void highlightMenuItem(MenuItem item) {
+		SpannableString s = new SpannableString(item.getTitle());
+		s.setSpan(new ForegroundColorSpan(Color.rgb(200, 70, 70)), 0, s.length(), 0);
+		item.setTitle(s);
 	}
 
 	private interface OptionsMenuListener {
@@ -633,6 +660,8 @@ public final class OptionsMenuUtility {
 		void onBlock();
 
 		void onUnblock();
+
+		PostSort getPostSort();
 	}
 
 	public interface OptionsMenuCommentsListener extends OptionsMenuListener {
@@ -645,5 +674,7 @@ public final class OptionsMenuUtility {
 		void onSortSelected(UserCommentListingURL.Sort order);
 
 		void onSearchComments();
+
+		PostCommentListingURL.Sort getCommentSort();
 	}
 }

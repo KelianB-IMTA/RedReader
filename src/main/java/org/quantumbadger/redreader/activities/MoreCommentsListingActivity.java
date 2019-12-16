@@ -40,7 +40,7 @@ import org.quantumbadger.redreader.views.RedditPostView;
 
 import java.util.ArrayList;
 
-public class MoreCommentsListingActivity extends RefreshableActivity
+public class 	MoreCommentsListingActivity extends RefreshableActivity
 		implements RedditAccountChangeListener,
 		OptionsMenuUtility.OptionsMenuCommentsListener,
 		RedditPostView.PostSelectionListener {
@@ -195,5 +195,10 @@ public class MoreCommentsListingActivity extends RefreshableActivity
 	@Override
 	public void onBackPressed() {
 		if(General.onBackPressed()) super.onBackPressed();
+	}
+
+	@Override
+	public PostCommentListingURL.Sort getCommentSort() {
+		return null;
 	}
 }
